@@ -123,8 +123,6 @@ class Server:
 
 	def process(self):
 		while True:
-			# mimic doing self.clock_rate things per second with a 1 second sleep call at the start, then do the logic
-			# time.sleep(1)
 			# number of instructions completed thus far - stop when we hit clock_rate
 			curr_count = 0
 
@@ -158,7 +156,6 @@ class Server:
 					# send message to both socket_1 and socket_2
 					elif curr_op == 3:
 						self.socket_1.send((self.name + str(self.clock)).encode("ascii"))
-						# time.sleep(0.0001)
 						self.socket_2.send((self.name + str(self.clock)).encode("ascii"))
 						self.clock += 1
 						self.my_log.write('s|' + self.socket_1_name + self.socket_2_name + ' | ' + time.ctime() + ' | ' + str(self.clock) + '\n')
@@ -167,6 +164,8 @@ class Server:
 						self.my_log.write('i' + ' | ' + time.ctime() + ' | ' + str(self.clock) + '\n')
 					
 				curr_count += 1
+				
+				# sleep before next intruction
 				time.sleep(1/self.clock_rate)
 
 
