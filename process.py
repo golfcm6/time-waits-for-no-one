@@ -107,41 +107,40 @@ class Process:
 
 	# run a single clock tick
 	def one_tick(self):
-		while True:
-			start_time = time.time()
-			with open(self.log_file_name, 'a') as log:
-				# handle case with nonempty queue
-				if self.network_queue:
-					with self.network_queue_lock:
-						msg = self.network_queue.pop(0)
+		start_time = time.time()
+		with open(self.log_file_name, 'a') as log:
+			# handle case with nonempty queue
+			if self.network_queue:
+				with self.network_queue_lock:
+					msg = self.network_queue.pop(0)
 
-					# msg[0] is sender name, msg[1] is sender time
-					# logical clock update rule
-					self.clock = max(self.clock, msg[1]) + 1
-					log.write(f'read |  {msg[0]}  | {time.ctime()} | {len(self.network_queue)} | {self.clock}\n')
-				# handle case with empty queue
+				# msg[0] is sender name, msg[1] is sender time
+				# logical clock update rule
+				self.clock = max(self.clock, msg[1]) + 1
+				log.write(f'read |  {msg[0]}  | {time.ctime()} | {len(self.network_queue)} | {self.clock}\n')
+			# handle case with empty queue
+			else:
+				curr_op = randint(1, 10)
+
+				# send message to socket 0
+				if curr_op == 1:
+					self.send_message([self.sockets[0]])
+					self.clock += 1
+					log.write(f'send |  {self.socket_names[0]}  | {time.ctime()} | - | {self.clock}\n')
+				# send message to socket 1
+				elif curr_op == 2:
+					self.send_message([self.sockets[1]])
+					self.clock += 1
+					log.write(f'send |  {self.socket_names[1]}  | {time.ctime()} | - | {self.clock}\n')
+				# send message to both socket 0 and socket 1
+				elif curr_op == 3:
+					self.send_message(self.sockets)
+					self.clock += 1
+					log.write(f'send | {" ".join(self.socket_names)} | {time.ctime()} | - | {self.clock}\n')
 				else:
-					curr_op = randint(1, 10)
-
-					# send message to socket 0
-					if curr_op == 1:
-						self.send_message([self.sockets[0]])
-						self.clock += 1
-						log.write(f'send |  {self.socket_names[0]}  | {time.ctime()} | - | {self.clock}\n')
-					# send message to socket 1
-					elif curr_op == 2:
-						self.send_message([self.sockets[1]])
-						self.clock += 1
-						log.write(f'send |  {self.socket_names[1]}  | {time.ctime()} | - | {self.clock}\n')
-					# send message to both socket 0 and socket 1
-					elif curr_op == 3:
-						self.send_message(self.sockets)
-						self.clock += 1
-						log.write(f'send | {" ".join(self.socket_names)} | {time.ctime()} | - | {self.clock}\n')
-					else:
-						self.clock += 1
-						log.write(f'int  | --- | {time.ctime()} | - | {self.clock}\n')
-			time.sleep(self.single_clock_tick_length - (time.time() - start_time))
+					self.clock += 1
+					log.write(f'int  | --- | {time.ctime()} | - | {self.clock}\n')
+		time.sleep(self.single_clock_tick_length - (time.time() - start_time))
 
 def main():
 	args = sys.argv[1:]
