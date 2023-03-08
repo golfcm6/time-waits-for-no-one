@@ -41,13 +41,15 @@ class Process:
 		# - if B, you create socket to C and connect to A
 		# - if C, you just connect to existing A and B sockets
 		# A must be made before B, B must be made before C
+
+		# note that the listen ports always come before the connect ports
 		if name == 'a':
 			self.handle_sockets(listen_ports = [PORT_A_B, PORT_A_C])
 			self.socket_names = ['b', 'c']
 
 		elif name == 'b':
 			self.handle_sockets(listen_ports = [PORT_B_C], connect_ports = [(PORT_A_B, 'a')])
-			self.socket_names = ['a', 'c']
+			self.socket_names = ['c', 'a']
 		
 		else:
 			self.handle_sockets(connect_ports = [(PORT_A_C, 'a'), (PORT_B_C, 'b')])
@@ -72,19 +74,19 @@ class Process:
 			i += 1
 
 	# logic for the threads that listen to other servers and update network queue
-	def listen(self, s):
+	def listen(self, sock, sender):
 		while True: 
-			data = s.recv(1024)
+			data = sock.recv(1024)
 			# if this socket is not receiving any info, then close the socket
 			if not data:
-				s.close()
+				sock.close()
 				break
 
 			data = data.decode('ascii')
 
 			# sender is the machine the message originated from (a, b, c)
 			# msg is the logical time of the sender (int)
-			sender, msg = data[:1], int(data[1:])
+			msg = int(data)
 
 			# add this message to the local network queue
 			with self.network_queue_lock:
@@ -93,7 +95,7 @@ class Process:
 	# send a message via all requested sockets
 	def send_message(self, sockets):
 		for socket in sockets:
-			socket.send((self.name + str(self.clock)).encode('ascii'))
+			socket.send(str(self.clock).encode('ascii'))
 
 	# accept connections from all processes that were initialized after this process
 	def accept_connections(self, process_names):
@@ -154,8 +156,8 @@ def main():
 	elif machine_name == 'b':
 		process.accept_connections(['c'])
 
-	for socket in process.sockets:
-		start_new_thread(process.listen, (socket, ))
+	for i, sock in enumerate(process.sockets):
+		start_new_thread(process.listen, (sock, process.socket_names[i]))
 
 	while True:
 		process.one_tick()
