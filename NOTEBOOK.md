@@ -12,13 +12,13 @@ From here on out, we'll refer to the three processes as a, b, and c. The primary
 
 ## Average Jump
 
-![average jump graph]()
+![average jump graph](https://github.com/golfcm6/time-waits-for-no-one/blob/main/jump_graph.png)
 
 This graph shows the average jump computed over all processes for a particular trial and setting. There are 5 trials per setting and 3 different settings. In each trial, we have a new set of 3 random clock cycles. A standard clock progression would just increase the clock by 1, so we want to compare these average jump values to 1 to understand how differing clock rates can cause bigger jumps in the logical clock progression.
 
 It should be noted that jumps are closely related to drift in the logical clocks since the jump resolves the drift and catches the slower process up to the faster process. Thus whenever we observe bigger jumps, there will be greater drift and vice versa.
 
-![average queue length]()
+![average queue length](https://github.com/golfcm6/time-waits-for-no-one/blob/main/queue_graph.png)
 
 This graph shows the average length of the queue during reads from the network queue. If two processes have the same clock cycle, they should have queue lengths very close to 0 since they're reading at the same rate that the other process is sending messages. On the other hand, if one process is slower than the other, then the network queue will build up on the slower process as the faster process sends out more messages.
 
