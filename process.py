@@ -28,7 +28,7 @@ class Process:
 		self.network_queue = [] # list of tuples: (host, port, msg)
 		self.clock_rate = randint(1, 6)
 		self.single_clock_tick_length = 1 / self.clock_rate
-		print(f'The clock rate is {self.clock_rate}\n')
+		print(f'Machine {self.name}\'s clock rate is {self.clock_rate}')
 		# initialize the logic clock to be at time 0
 		self.clock = 0
 
@@ -67,7 +67,7 @@ class Process:
 		for port, process_name in connect_ports:
 			try:
 				self.sockets[i].connect((self.host_ip, port))
-				print(f'Connected to machine {process_name}')
+				print(f'Machine {self.name} connected to machine {process_name}')
 			except:
 				print(f'Could not connect to machine {process_name}, check status')
 				raise ConnectionError
@@ -100,9 +100,9 @@ class Process:
 	# accept connections from all processes that were initialized after this process
 	def accept_connections(self, process_names):
 		for i, name in enumerate(process_names):
-			print(f'Waiting on machine {name}, please wait ...')
+			print(f'Machine {self.name} is waiting on machine {name}, please wait ...')
 			conn, _ = self.sockets[i].accept()
-			print(f'Connected to {name}')
+			print(f'Machine {self.name} connected to machine {name}')
 			self.sockets[i] = conn
 
 	# run a single clock tick
